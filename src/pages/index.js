@@ -4,11 +4,13 @@ import { connect } from 'react-redux';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import withAuth,{ PUBLIC } from '../components/withAuth';
-import Storage,{ FEATHERS_STORAGE } from '../api/storage'
+import Storage,{_STORAGE } from '../api/storage';
+import SearchForm from '../components/SearchForm';
+import Login from '../components/Login';
 
-class Index extends Component {   
-    
-    
+class Index extends Component {
+
+
     constructor (props) {
         super(props);
         this.state = {
@@ -21,33 +23,35 @@ class Index extends Component {
                     groups:{}
                 }
             }
-        }
+        };
     }
-    
-    
-    
+
+
+
     render() {
-        
+
         const { user } = this.props;
         const name = user ? `${user.alias}` : null;
         const isAuth = user ? user.authenticated : false;
-        const isLoading = this.props.loaded ? this.props.loaded  : false;
+        const mainLogo = '/static/logo.png?v=1.5';
         return (
             <Layout>
-                <div>
-                 { isAuth ? <h1>Welcome, {name}</h1> : <button class="btn btn-warning">Sign Up</button> }
+                
 
-                </div>
-                <div>
-                    <hr/>
-                    <h3>Your Info</h3>
-                    
-                    <ul className="list-group">
 
-                    </ul>
-                </div>
 
-            </Layout>    
+
+
+                    { isAuth ?
+                    (
+                      <SearchForm mainLogo={mainLogo} />
+                    ):
+                    (
+                      <Login />
+                    )
+                    }
+
+            </Layout>
         );
     }
 };

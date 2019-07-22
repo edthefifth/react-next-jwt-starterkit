@@ -1,30 +1,39 @@
-import { SET_AUTH } from './types';
+import { SET_AUTH, SET_REFRESH_TOKEN, REFRESH_TOKEN} from './types';
 // Cookie parser used for extracting the JWT in an SSR scenario
 import cookieParser from 'cookie';
 import auth from '../api/auth';
-import Storage,{ FEATHERS_STORAGE } from '../api/storage';
 import Router from 'next/router';
-import { setCookie, removeCookie } from '../util/cookie';
+import Storage,{ AT_STORAGE, RT_STORAGE } from '../api/storage';
+import { setCookie,getCookie, storeInSecureSession } from '../util/cookie';
 
 
 
 // -- ACTIONS
-export function login (payload) {
+export function login (payload,nextURL) {
+  const _destination = !nextURL || nextURL === undefined ? '/' : nextURL;
   return (dispatch) => {
-    return auth.login(payload.alias, payload.password)
-    .then(({user, jwt}) => {
+    return auth.login(payload.username, payload.password)
+    .then(({user, access, refresh}) => {
         user.authenticated=true;
-        setCookie(FEATHERS_STORAGE,jwt);
-        Router.push('/');
+        setCookie(AT_STORAGE,access);
+        storeInSecureSession(RT_STORAGE,refresh);
+        Router.push(_destination);
+        dispatch({
+          type: SET_REFRESH_TOKEN,
+          refresh: {
+            expiration:refresh.expiration
+          }
+        });
         const result = dispatch({
           type: SET_AUTH,
           auth: {
             user,
-            jwt
+            jwt:access.token,
+            expiration:access.expiration
           }
         });
 
-        
+
 
         return result;
     });
@@ -34,57 +43,31 @@ export function login (payload) {
 export function logout () {
   return (dispatch) => {
     return auth.signout()
-    .then(() => {
-        removeCookie(FEATHERS_STORAGE);
+    .then(({user,jwt,expiration}) => {
         const result = dispatch({
-          type: SET_AUTH,
-          auth: {
-            user: {authenticated:false},
-            jwt: null
-          }
-        });
-      
-
-      return result;
-    });
-  };
+            type: SET_AUTH,
+            auth: {
+              user,
+              jwt,
+              expiration
+            }
+          });
+        return result;
+      });
+  }
 };
 
-export function register (payload) {
-    return (dispatch) => {
-      return auth.register(payload.alias, payload.password)
-      .then(_ => {
-        return auth.login(payload.alias, payload.password)
-          .then(({user, jwt}) => {
-              setCookie(FEATHERS_STORAGE,jwt);
-              user.authenticated=true;
-              Router.push('/');
-              const result = dispatch({
-                type: SET_AUTH,
-                auth: {
-                  user,
-                  jwt
-                }
-              });
-              
-              
-
-              return result;
-          });
-      });
-    };
-}; 
 
 export function authenticate (jwtFromCookie = null) {
   return (dispatch) => {
     return auth.authenticate(jwtFromCookie)
-    .then(({user,jwt}) => {
-      user.authenticated=true;
+    .then(({user,jwt,expiration}) => {
       const result = dispatch({
         type: SET_AUTH,
         auth: {
           user,
-          jwt
+          jwt,
+          expiration
         }
       });
       return result;
@@ -92,38 +75,26 @@ export function authenticate (jwtFromCookie = null) {
   };
 };
 
-
-
-// UTILS
-/*
-export function setClientCookie(name, value) {
-  document.cookie = name + '=' + value;
+export function refreshJWT(user,refreshToken){
+  return (dispatch) => {
+    return auth.refresh(user,refreshToken)
+    .then(({user, access}) => {
+      setCookie(AT_STORAGE,access);
+      dispatch({
+        type: REFRESH_TOKEN,
+        refresh: {
+          refreshedUntil:access.expiration,
+        }
+      });
+      const result = dispatch({
+        type: SET_AUTH,
+        auth: {
+          user,
+          jwt:access.token,
+          expiration:access.expiration
+        }
+      });
+      return result;
+    });
+  }
 };
-
-export function clearClientCookie(name) {
-  document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-};
-
-export function setServerCookie(res, name, value) {
-  res.cookie(name, value, {});  // maxAge: 900000, httpOnly: true })
-};
-
-export function clearServerCookie(res, name) {
-  res.clearCookie(name);
-};
-
-export function getServerCookie(req, name) {
-  const cookies = extractCookies(req);
-  const cookie = cookies ? cookies[name] : null;
-
-  return cookie;
-};
-
-function extractCookies(req) {
-  const cookies = req.headers.cookie;
-  if (!cookies) return null;
-
-  return cookieParser.parse(cookies);
-}
-
-*/

@@ -1,31 +1,47 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import Link from 'next/link';
 import { connect } from 'react-redux';
 import { logout } from '../actions/authActions';
 import Head from 'next/head';
-import Navbar from './Navbar';
+import Navbar from './GlobalNavbar';
 
 class Layout extends Component {
-    
-    render () {   
+
+    render () {
         return (
-            <div>
+            <div className="">
                 <Head>
-                    <title>WISL Benefaction - Anonymously Support Content Creators</title>
-                    <link rel="stylesheet" href="/static/bootstrap.min.css"/>
-                    <link rel="stylesheet" href="/static/index.css"/>
-                    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.5.0/css/all.css' integrity='sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU' crossorigin='anonymous'/>
-                    
-                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-                    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+                    <title></title>
+                    <link rel="stylesheet" href="/static/bootstrap.min.css?v=1.0"/>
+                    <link rel="stylesheet" href="/static/index.css?v=1.2"/>
+                    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.5.0/css/all.css' integrity='sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU' crossOrigin='anonymous'/>
+
                 </Head>
                 <Navbar />
-                <div className="container pt-5">
+                <div className="container pt-5 screen-height">
                     {this.props.children}
                 </div>
+                <footer className='bg-dark fixed-bottom'>
+                    <div className='container p-sm-2'>
+                        <div className='row'>
+
+                            <div className='col'>
+                                <Link href='/contact'><a className='text-white enlarge-font'>Contact</a></Link>
+                            </div>
+                            <div className='col'>
+                                <Link href='/terms'><a className='text-white enlarge-font'>Terms of Service</a></Link>
+
+                            </div>
+
+                            <div className='col'>
+                                <Link href='/privacy'><a className='text-white enlarge-font'>Privacy Policy</a></Link>
+                            </div>
+                        </div>
+
+                    </div>
+                </footer>
             </div>
         );
     }
 }
 export default connect()(Layout);
-
-

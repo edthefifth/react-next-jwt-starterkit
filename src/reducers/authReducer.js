@@ -1,23 +1,41 @@
 // -- INITIAL STORE
 const initialState = {
 
-    user: {alias:'Anonymous',authenticated:false,groups:{}},
+    user: {alias:'Anonymous',authenticated:false,groups:{},profile:{},metadata:{},permissions:{}},
     jwt: null
 
 };
 
 
-import { SET_AUTH } from '../actions/types';
+import { SET_AUTH, REFRESH_TOKEN,SET_REFRESH_TOKEN, VERIFY_EMAIL, SEND_VERIFY_EMAIL, SEND_EMAIL_RESET, RESET_PASSWORD, CHANGE_PASSWORD } from '../actions/types';
 
 export default function(state = initialState,action){
     switch (action.type) {
-        case SET_AUTH: {
-          console.log("authReducer set_auth",state,action.auth);      
-          return {...state,user:action.auth.user,jwt:action.auth.jwt};
-        }
 
+        case SET_AUTH: {
+          return {...state,auth:action.auth};
+        }
+        case SET_REFRESH_TOKEN: {
+          return {...state,refreshExpiration:action.refresh.expiration};
+        }
+        case REFRESH_TOKEN: {
+          return {...state,refreshUntil:action.refresh.refreshUntil};
+        }
+        case SEND_VERIFY_EMAIL:{
+            return {...state,sent:action.sent};
+        }
+        case VERIFY_EMAIL:{
+            return {...state,success:action.success};
+        }
+        case SEND_EMAIL_RESET:{
+            return {...state,sent:action.sent};
+        }
+        case RESET_PASSWORD:{
+            return {...state,success:action.success};
+        }
+        case CHANGE_PASSWORD:{
+            return {...state,success:action.success};
+        }
         default: return state
     }
 }
-
-

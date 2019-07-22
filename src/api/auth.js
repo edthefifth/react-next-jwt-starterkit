@@ -1,70 +1,85 @@
 import client from './restRequest'
+import { removeCookie } from '../util/cookie';
+
+import jwt from 'jsonwebtoken';
+
+function decodeJWT (acccessJWT) {
+    const decodedJWT = jwt.verify(accessJWT);
+    decodedJWT.user.authenticated = true;
+    return Promise.resolve({
+      user: decodedJWT.user,
+      jwt: acccessJWT,
+      expiration: decodedJWT.exp
+    });
+}
+
+function clearUser(){
+    return Promise.resolve({
+        user: {authenticated:false},
+        jwt: null,
+        expiration: -1
+    });
+}
 
 const auth = {
 
-  fetchUser (accessToken) {
-
-    return client.passport.verifyJWT(accessToken)
-      .then(payload => {
-        return client.service('users').get(payload.userId)
-      })
-      .then(user => {
-        return Promise.resolve(user)
-      })
-  },
-
-  authenticate (jwtFromCookie) {
-
-
-    let jwt = null
-
-    return client.authenticate({strategy:'jwt',accessToken:jwtFromCookie})
-      .then((response) => {
-        console.log('authenticate successful');
-
-        jwt = response.accessToken
-
-        return this.fetchUser(jwt);
-      })
-      .then(user => {
-        console.log('authenticate, got user',user,jwt);
-        user.authenticated = true;
-        return Promise.resolve({user, jwt});
-      })
-      .catch((err) => {
-        console.log('authenticate failed', err);
-
-        return Promise.resolve({user: null, jwt: null});
-      });
+  authenticate (accessCookie) {
+    let accessJWT = accessCookie.token;
+    return decodeJWT(accessJWT);
   },
 
   signout () {
-    console.log('signout')
-
-    return client.logout()
-      .then(() => {
-        console.log('signout successful')
-      })
-      .catch((err) => {
-        console.log('signout failed', err)
-
-        return Promise.reject(err)
-      })
+    return clearUser();
   },
 
-  register (alias, password) {
-    return client.service('users').create({
-      alias: alias,
+  register (username, password) {
+    return client.post("/register",{
+      username: username,
       password: password
-    })
+    }).then((_u)=>{
+        console.log('register auth',_u);
+        const accessJWT = _u.access;
+        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
+            return Promise.resolve({
+                user: user,
+                access:_u.access,
+                refresh:_u.refresh
+            });
+        });
+    });
   },
 
-  login (alias, password) {
-    return client.authenticate({
-      strategy: 'local',
-      alias: alias,
+  login (username, password) {
+    return client.post("/login",{
+      username: username,
       password: password
-    })
+    }).then((_u)=>{
+        console.log('login auth',_u);
+        const accessJWT = _u.access;
+        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
+            return Promise.resolve({
+                user: user,
+                access:_u.access,
+                refresh:_u.refresh
+            });
+        });
+    });
+  },
+
+  refresh (username, refreshToken) {
+    return client.post("/refreshToken",{
+      username: username,
+      token: refreshToken.token
+    }).then((_u)=>{
+        console.log('refresh response',_u);
+        const accessJWT = _u.access;
+        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
+            return Promise.resolve({
+                user: user,
+                access:_u.access
+            });
+        });
+    });
   }
 
 }

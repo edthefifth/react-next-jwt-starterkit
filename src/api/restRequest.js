@@ -1,8 +1,8 @@
-import feathers from '@feathersjs/feathers'
-import rest from '@feathersjs/rest-client'
-import auth from '@feathersjs/authentication-client'
+//import feathers from '@feathersjs/feathers'
+//import rest from '@feathersjs/rest-client'
+//import auth from '@feathersjs/authentication-client'
 import axios from 'axios'
-import storage,{ FEATHERS_STORAGE, API_HOST } from './storage'
+import { API_HOST } from './storage'
 
 //
 // TODO get rid of this hardcoded API_ENDPOINT, make it configurable !
@@ -18,27 +18,32 @@ const getUrl = endpoint => API_HOST + endpoint;
 
 export const post = async (endpoint, data) => {
   return axios.post(getUrl(endpoint), data, {
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json","Accept":"application/json" }
   });
 };
 
-export const get = async (endpoint, jwt) => {
+export const get = async (endpoint) => {
   const headers = jwt
     ? {
-        headers: { Authorization: `Bearer ${jwt}` }
+        headers: { "Accept":"application/json" }
       }
     : null;
   return axios.get(getUrl(endpoint), headers);
 };
 
+export const postWithJWT = async (endpoint, jwt ,data) => {
+  return axios.post(getUrl(endpoint), data, {
+    headers: { "Accept":"application/json","Content-Type": "application/json", "Authorization": `${jwt}` }
+  });
+};
 
+export const getWithJWT = async (endpoint, jwt) => {
+  const headers = jwt
+    ? {
+        headers: { "Accept":"application/json","Authorization": `${jwt}` }
+      }
+    : null;
+  return axios.get(getUrl(endpoint), headers);
+};
 
-
-const restClient =  feathers()
-  .configure(rest(API_HOST).axios(axios))
-  .configure(auth({header:'Authorization','prefix':'Bearer'}));
-
-restClient.service('/users');
-
-
-export default restClient;
+export default {get:get,post:post}

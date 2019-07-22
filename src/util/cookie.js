@@ -17,6 +17,18 @@ export const removeCookie = (key) => {
   }
 };
 
+export const getFromSecureSession = (req,key) => {
+  const value = req.session ? req.session[key] : null;
+}
+
+export const storeInSecureSession = (req,key,value) => {
+  if(req.session)
+  {
+    req.session[key]=value;
+  }
+  return req;
+}
+
 export const getCookie = (key, req) => {
   return process.browser
     ? getCookieFromBrowser(key)
@@ -28,7 +40,7 @@ const getCookieFromBrowser = key => {
 };
 
 const getCookieFromServer = (key, req) => {
-  if (!req.headers.cookie) {
+  if (!req || !req.headers || !req.headers.cookie) {
     return undefined;
   }
   const rawCookie = req.headers.cookie
@@ -39,5 +51,3 @@ const getCookieFromServer = (key, req) => {
   }
   return rawCookie.split('=')[1];
 };
-
-
