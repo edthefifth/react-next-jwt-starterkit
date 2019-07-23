@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import React, { Component } from 'react';
 import DynamicTable from '../components/DynamicTable';
+import ErrorMessages from '../components/ErrorMessages';
+import SuccessMessages from '../components/SuccessMessages';
 import { connect } from 'react-redux';
 import { Container, Row, Col } from 'reactstrap';
+
 
 class CrudTableObject extends Component {
 
@@ -10,83 +13,68 @@ class CrudTableObject extends Component {
         super(props);
         this.state = {
             pageLoaded:false,
-            createAPI:null,
-            readAPI:null,
-            updateAPI:null,
-            deleteAPI:null
-
+            query:{},
+            errorMessages:[],
+            successMessages:[]
         };
     }
 
-    componentWillMount = () =>{
-
-    }
-
-    componentDidMount =() =>{
-        this.setState({pageLoaded:true});
-    }
-
-    componentWillUnmount = () =>{
-
-    }
-
-    componentWillUpdate = () =>{
-
-    }
-
-    componentDidUpdate = () =>{
-
-    }
-
-    onPaginate = (e) => {
-       console.log(e);
-    };
-
-
-    onQuery = (e) => {
-       console.log(e);
-    };
-
-    onUpdate = (e) => {
-      if(!updateAPI) return;
-      else {
-        console.log(e);
-      }
-    };
-
-    onDelete = (e) => {
-      if(!deleteAPI) return;
-      else {
-        console.log(e);
-      }
-    };
 
     onCreate = (e) => {
+      const {dispatch, createAPI} = this.props;
       if(!createAPI) return null;
       else {
         console.log(e);
       }
     };
 
+    changeQuery = (e) => {
+      try{
+        const query = JSON.parse(e.target.value);
+        this.setState({query:query});
+      }
+      catch(err){
+        console.log(err);
+        this.setState({errorMessage:err.message});
+      }
+
+    }
+
+
+
+
 
 
     render () {
-        const { onCreate, onDelete, onQuery, onUpdate, title, subtitle = 'Paginated data'  } = this.props;
-        const { pageLoaded } = this.state;
+        const { onCreate, onDelete, onQuery, onUpdate, title, loadData=false, createAPI = null,readAPI = null,updateAPI=null,deleteAPI=null ,subtitle = 'data table'  } = this.props;
+        const { pageLoaded, query ,errorMessages,successMessages} = this.state;
         return (
-                  <Container>
-                        <Row>
+                  <Container className="mt-sm-3">
+
+                        <Row className="mb-sm-1">
                             <Col>
-                                <h4 className="text-capitalize">{title}</h4>
-                                <p>{subtitle}</p>
+                                <h2 className="text-capitalize">{title}</h2>
+                                <p className='text-muted font-italic'>{subtitle}</p>
                             </Col>
                         </Row>
+                        <Row className="mb-sm-1">
+                          <Col>
+                            <ErrorMessages messages={errorMessages}/>
+                            <SuccessMessages messages={successMessages}/>
+                          </Col>
+                        </Row>
+                        <Row className="mb-sm-1">
+                          <Col></Col>
+                          <Col>
+                            <label>Filters:</label>
+                            <input type='hidden' value={JSON.stringify(query)} onChange={this.changeQuery}/>
+                          </Col>
+                        </Row>
+
+                        <DynamicTable crud={{read:readAPI,update:updateAPI,delete:deleteAPI}} query={query} loadData={loadData} />
 
 
-                        <DynamicTable onQuery={onQuery} onDelete={onDelete} onCreate={onCreate} onUpdate={onUpdate} />
-
-
-                    </Container>
+                  </Container>
 
         );
     }

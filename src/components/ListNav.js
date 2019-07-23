@@ -38,15 +38,13 @@ class ListNav extends Component {
 
     render () {
         const { setActiveTab, activeTab ,listArray = []  } = this.props;
-        console.log(listArray);
         let navItems = listArray.map( (listItem,listIndex) =>
         {
-          console.log(listIndex,activeTab,(activeTab == (listIndex+1)));
           return (
             <NavItem key={(listIndex)}>
               <NavLink
-                className={activeTab == (listIndex+1).toString() ? 'active text-capitalize' : 'text-capitalize'}
-                onClick={() => { setActiveTab((listIndex+1).toString()); }}
+                className={activeTab === (listIndex+1) ? 'active text-capitalize' : 'text-capitalize'}
+                onClick={() => { setActiveTab((listIndex+1)); }}
               >
                 {listItem.name}
               </NavLink>

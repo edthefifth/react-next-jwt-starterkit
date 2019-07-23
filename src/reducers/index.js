@@ -4,6 +4,6 @@ import crudReducer from './crudReducer';
 import analyticsReducer from './analyticsReducer';
 export default combineReducers({
         auth:authReducer,
-        crudReducer,
+        crud:crudReducer,
         analyticsReducer
 });

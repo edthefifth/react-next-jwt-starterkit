@@ -1,7 +1,7 @@
 import { CREATE,READ,UPDATE,DELETE } from './types';
 
 
-export function crudREAD (api,payload) {
+export function CrudREAD (api,payload) {
     return (dispatch) => {
 
                 const result = dispatch({
@@ -11,47 +11,48 @@ export function crudREAD (api,payload) {
                          {id:'e45ee7ce7e88149af8dd32b27f9512ce',name:'john',email:'john@example.com'},
                          {id:'7d0665438e81d8eceb98c1e31fca80c1',name:'bob',email:'bob@example.com'},
                          {id:'751d31dd6b56b26b29dac2c0e1839e34',name:'anne',email:'anne@example.com'},
-                       ]
+                       ],
+                  api: api
                 });
                 return result;
-        });
+
     };
 }
 
-export function crudCREATE (api,payload) {
+export function CrudCREATE (api,payload) {
     return (dispatch) => {
 
                 const result = dispatch({
                   type: CREATE,
                   data: [payload.data],
-                  success:true
+                  success:true,
+                  api: api
                 });
                 return result;
-        });
     };
 }
 
-export function crudUPDATE (api,payload) {
+export function CrudUPDATE (api,payload) {
     return (dispatch) => {
 
                 const result = dispatch({
                   type: UPDATE,
                   data: [payload.data],
-                  success:true
+                  success:true,
+                  api: api
                 });
                 return result;
-        });
     };
 }
 
-export function crudDELETE (api,payload) {
+export function CrudDELETE (api,payload) {
     return (dispatch) => {
 
                 const result = dispatch({
                   type: DELETE,
-                  success:true
+                  success:true,
+                  api: api 
                 });
                 return result;
-        });
     };
 }

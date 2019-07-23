@@ -14,14 +14,14 @@ class DataPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          activeTab:'1'
+          activeTab:1
         };
 
     }
 
 
     getList = () => {
-        return [{name:'users'},{name:'groups'}]
+        return [{name:'users',readAPI:'get_users'},{name:'groups',readAPI:'get_groups'}]
     };
 
 
@@ -41,15 +41,23 @@ class DataPage extends Component {
 
     }
 
+    loadTableData(activeTab,myTab){
+      const tabInt = parseInt(activeTab);
+      return tabInt === myTab;
+    }
+
     render () {
         const { user } = this.props;
         const {activeTab} = this.state;
         const isAuth = user ? user.authenticated : false;
         const list = this.getList();
         let objectPanes = list.map( (listItem,itemIndex) => {
-          <TabPane tabId={(itemIndex+1)} key={itemIndex}>
-            <CrudTableObject total={listItem} />
-          </TabPane>
+          const readAPI = listItem.readAPI?listItem.readAPI:'get';
+          return (
+            <TabPane tabId={(itemIndex+1)} key={itemIndex}>
+              <CrudTableObject readAPI={readAPI} title={listItem.name} loadData={this.loadTableData(activeTab,(itemIndex+1))} />
+            </TabPane>
+          );
         });
         const onSetActiveTab = this.setActiveTab;
         return (

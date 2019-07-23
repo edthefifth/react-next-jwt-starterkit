@@ -2,8 +2,8 @@
 const initialState = {
 
     user: {alias:'Anonymous',authenticated:false,groups:{},profile:{},metadata:{},permissions:{}},
-    jwt: null
-
+    jwt: null,
+    expiration: -1
 };
 
 
@@ -13,7 +13,7 @@ export default function(state = initialState,action){
     switch (action.type) {
 
         case SET_AUTH: {
-          return {...state,auth:action.auth};
+          return {...state,user:action.auth.user,jwt:action.auth.jwt,expiration:action.auth.expiration};
         }
         case SET_REFRESH_TOKEN: {
           return {...state,refreshExpiration:action.refresh.expiration};

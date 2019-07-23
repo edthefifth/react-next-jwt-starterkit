@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 
 class DataColumn extends Component {
-    
-    
-    
+
+
+
         constructor (props) {
             super(props);
             this.state = {
@@ -12,23 +12,24 @@ class DataColumn extends Component {
         }
 
         render () {
-            
-            
-            if(this.props.header){
-                <th scope="col">
-                        {this.props.value}
-                </th>  
+
+            const {name, value, isHeader = false} = this.props;
+
+            if(isHeader){
+                return (
+                  <th scope="col" name={name}>
+                          {this.props.value}
+                  </th>
+                );
             } else {
                 return (
-                    <td scope="col">
+                    <td scope="col" name={name}>
                         {this.props.value}
-                    </td>     
+                    </td>
                 );
             }
-        }    
+        }
 }
 
 
 export default DataColumn;
-
-

@@ -1,12 +1,13 @@
 import React, { Component} from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import Link from 'next/link';
+import LinkTile from '../components/LinkTile';
 import Layout from '../components/Layout';
 import withAuth,{ PUBLIC } from '../components/withAuth';
 import Storage,{_STORAGE } from '../api/storage';
 import SearchForm from '../components/SearchForm';
 import Login from '../components/Login';
+import { Container,Row, Col } from 'reactstrap';
 
 class Index extends Component {
 
@@ -36,7 +37,7 @@ class Index extends Component {
         const mainLogo = '/static/logo.png?v=1.5';
         return (
             <Layout>
-                
+
 
 
 
@@ -44,7 +45,20 @@ class Index extends Component {
 
                     { isAuth ?
                     (
-                      <SearchForm mainLogo={mainLogo} />
+                      <Container>
+                        <Row>
+                          <Col>
+                            <LinkTile text='Data Tables' link='/data' color='orange' />
+                          </Col>
+                          <Col>
+                            <LinkTile text='Activity logs' link='/data' color='blue' />
+                          </Col>
+                        </Row>
+                        <Row>
+
+                        </Row>
+
+                      </Container>
                     ):
                     (
                       <Login />
