@@ -8,6 +8,10 @@ import Storage,{_STORAGE } from '../api/storage';
 import SearchForm from '../components/SearchForm';
 import Login from '../components/Login';
 import { Container,Row, Col } from 'reactstrap';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faDatabase, faList } from '@fortawesome/free-solid-svg-icons'
+library.add(faDatabase);
+library.add(faList);
 
 class Index extends Component {
 
@@ -15,15 +19,7 @@ class Index extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            loaded: false,
-            auth:{
-                user:  {
-                    alias:null,
-                    jwt:null,
-                    authenticated:false,
-                    groups:{}
-                }
-            }
+            loaded: false
         };
     }
 
@@ -32,8 +28,9 @@ class Index extends Component {
     render() {
 
         const { user } = this.props;
-        const name = user ? `${user.alias}` : null;
-        const isAuth = user ? user.authenticated : false;
+        const name = user && user.name? `${user.name}` : null;
+        const isAuth = user && user.authenticated ? user.authenticated : false;
+        console.log(isAuth);
         const mainLogo = '/static/logo.png?v=1.5';
         return (
             <Layout>
@@ -47,16 +44,14 @@ class Index extends Component {
                     (
                       <Container>
                         <Row>
-                          <Col>
-                            <LinkTile text='Data Tables' link='/data' color='orange' />
-                          </Col>
-                          <Col>
-                            <LinkTile text='Activity logs' link='/data' color='blue' />
-                          </Col>
-                        </Row>
-                        <Row>
+
+                            <LinkTile text='Data Tables' link='/data' bgColor='info' statIcon={faDatabase} />
+
+
+                            <LinkTile text='Activity logs' link='/data' bgColor='primary' statIcon={faList} />
 
                         </Row>
+
 
                       </Container>
                     ):

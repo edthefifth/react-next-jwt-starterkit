@@ -66,7 +66,7 @@ class GlobalNavbar extends Component {
                   </nav>
 
                   { isAuth
-                  ? <DropdownNavbar logout={this.handleLogout} alias={user.alias} />
+                  ? <DropdownNavbar logout={this.handleLogout} name={user.name} />
                   :(<nav className="navbar-nav ml-auto">
                     <div className="nav-item">
                         <Link href="/login"><a className="nav-link">Login</a></Link>
@@ -75,7 +75,7 @@ class GlobalNavbar extends Component {
                         <Link href="/register"><a className="nav-link">Register</a></Link>
                     </div>
                   </nav>)}
-                  
+
                 </Collapse>
               </div>
             </nav>

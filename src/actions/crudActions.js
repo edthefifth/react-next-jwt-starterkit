@@ -1,20 +1,32 @@
 import { CREATE,READ,UPDATE,DELETE } from './types';
-
+import client from '../api/restRequest';
+import { getCookie } from '../util/cookie';
+import Storage,{ AT_STORAGE, RT_STORAGE } from '../api/storage';
 
 export function CrudREAD (api,payload) {
-    return (dispatch) => {
-
+    return async (dispatch) => {
+          try{
+                const url = `/${api}`;
+                const jwt = JSON.parse(getCookie(AT_STORAGE));
+                console.log(jwt);
+                const response = await client.postWithJWT(url,jwt.token,payload);
+                console.log(response);
                 const result = dispatch({
                   type: READ,
-                  data: [{id:'96a3be3cf272e017046d1b2674a52bd3',name:'ed',email:'ed@example.com'},
-                         {id:'a2ef406e2c2351e0b9e80029c909242d',name:'max',email:'max@example.com'},
-                         {id:'e45ee7ce7e88149af8dd32b27f9512ce',name:'john',email:'john@example.com'},
-                         {id:'7d0665438e81d8eceb98c1e31fca80c1',name:'bob',email:'bob@example.com'},
-                         {id:'751d31dd6b56b26b29dac2c0e1839e34',name:'anne',email:'anne@example.com'},
-                       ],
-                  api: api
+                  data: response.data,
+                  api:api,
+                  paginate:{
+                    count:response.count,
+                    next:response.next,
+                    total:response.total
+                  }
                 });
                 return result;
+          }
+          catch (error)
+          {
+            return Promise.reject(error.message);
+          }
 
     };
 }
@@ -51,7 +63,7 @@ export function CrudDELETE (api,payload) {
                 const result = dispatch({
                   type: DELETE,
                   success:true,
-                  api: api 
+                  api: api
                 });
                 return result;
     };

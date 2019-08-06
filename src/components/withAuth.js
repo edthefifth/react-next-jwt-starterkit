@@ -1,47 +1,69 @@
 import React, { Component } from 'react'
 import Router from 'next/router'
-import { authenticate,refreshToken } from '../actions/authActions'
+import { authenticate,refreshJWT } from '../actions/authActions'
 import Error from 'next/error'
 import apiRequest,{ get, post} from '../api/restRequest'
 import Storage,{ AT_STORAGE,RT_STORAGE } from '../api/storage';
-import { getCookie,getFromSecureSession } from '../util/cookie';
+import { getCookie } from '../util/cookie';
 
 export const PUBLIC = 'PUBLIC'
 
 
-export default (permission = null) => ChildComponent => class withAuth extends Component {
+export default (permissionName = null,permissionValue = 1) => ChildComponent => class withAuth extends Component {
 
   static redirectToLogin (context) {
     const { req, res } = context
     const isServer = !!req;
-
+    console.log("redirecting To Login isServer:"+isServer);
     if (isServer) {
-      res.writeHead(302, { Location: `/login?next=${req.originalUrl}` })
-      res.end()
+      //res.writeHead(302, { Location: `/login?next=${req.originalUrl}` })
+      //res.end()
     } else {
       Router.push(`/login?next=${context.asPath}`)
     }
   }
 
   static userHasPermission (user) {
+
     const userGroups = user.groups || {}
     const userPermissions = user.permissions || {};
     let userHasPerm = true;
 
     // go here only if we have specific permission requirements
-    if (permission) {
-      userHasPerm = userPermissions[permission.toLowerCase()] && userPermissions[permission.toLowerCase()] > 0 ? true: false;
+    if (permissionName) {
+      console.log("userHasPermission Check",userPermissions[permissionName.toLowerCase()],userPermissions[permissionName.toLowerCase()].value);
+      userHasPerm = userPermissions[permissionName.toLowerCase()] && userPermissions[permissionName.toLowerCase()].value >= permissionValue ? true: false;
     }
     return userHasPerm;
   }
 
-  async componentDidMount() {
+  static async refreshToken(context,authObj){
+    const { store, req, res } = context;
+    const isServer = !!req;
+    console.log("refresh object & isServer",authObj.refreshExpiration,isServer)
+    if(authObj.refreshExpiration && (Date.now() < (authObj.refreshExpiration) * 1000)){
+      console.log("refresh check auth user",authObj.user);
+      if(isServer && authObj.user && authObj.user.name){
+        const refreshObject = getCookie(RT_STORAGE,context);
+        console.log("refresh object",refreshObject);
+        if(refreshObject){
+          await store.dispatch(refreshJWT(authObj.user.name,refreshObject.token));
+        }
+      } else {
+          //hard refresh to force serverside refresh of access token
+          console.log('needs refreshing from client');
+          //window.location.reload();
+      }
+    }
+  }
 
-        /*const isPublicPage = permission == PUBLIC;
+  async componentDidMount() {
+        /*
+        const isPublicPage = permissionName == PUBLIC;
 
         const _auth = this.context.store.getState().auth;
 
-
+        console.log(_auth);
         if(!_auth || !_auth.jwt)
         {
             const result = await this.dispatch(authenticate(jwt));
@@ -53,7 +75,6 @@ export default (permission = null) => ChildComponent => class withAuth extends C
         {
             this.setState({loaded:true});
         }
-        console.log(jwt);
         */
          // use file list to get single files
 
@@ -62,8 +83,8 @@ export default (permission = null) => ChildComponent => class withAuth extends C
     }
 
   static async getInitialProps (context) {
-    // public page passes the permission `PUBLIC` to this function
-    const isPublicPage = permission == PUBLIC;
+    // public page passes the permissionName `PUBLIC` to this function
+    const isPublicPage = permissionName == PUBLIC;
     const { store, req, res } = context;
 
     const isServer = !!req;
@@ -71,29 +92,28 @@ export default (permission = null) => ChildComponent => class withAuth extends C
     let _auth = store.getState().auth;
 
     if(_auth){
+      console.log(_auth,_auth.expiration,Date.now(),((_auth.expiration - 90) * 1000),((Date.now() >= (_auth.expiration - 90) * 1000)));
+
+      //if on server reauth
+      if(!_auth.user && !_auth.user.authenticated){
+
+        const accessObject = getCookie(AT_STORAGE,context);
+        await store.dispatch(authenticate(accessObject.token));
+      }
+
       //if going to expire in the next 90 seconds refresh access token if on server, refresh page otherwise
       if(!_auth.expiration || (Date.now() >= (_auth.expiration - 90) * 1000)){
-          let _refresh = store.getState().refresh;
-          if(_refresh && _refresh.expiration && (Date.now() < (_refresh.expiration) * 1000)){
-            console.log("refresh check auth user",_auth.user);
-            if(isServer && _auth.user && _auth.user.name){
-              const refreshObject = getFromSecureSession(req,RT_STORAGE);
-              if(refreshObject){
-                await store.dispatch(refresh(_auth.user.name,refreshObject.token));
-              }
-            } else {
-                //hard refresh to force serverside refresh of access token
-                window.location.reload();
-            }
-          }
-
+          console.log("Token needs to be refresh");
+          await this.refreshToken(context,_auth);
       }
       //Authenticate the user with JWT
+      /*
       if(!_auth.user && !_auth.user.authenticated){
         //
         const accessObject = isServer ? getCookie(AT_STORAGE,req):getCookie(AT_STORAGE);
-        await store.dispatch(authenticate(accessObject.token));
-      }
+        console.log(accessObject);
+        //await store.dispatch(authenticate(accessObject.token));
+      }*/
 
     }
 
@@ -107,7 +127,7 @@ export default (permission = null) => ChildComponent => class withAuth extends C
     let initProps = {}
 
 
-
+    console.log(user,user.authenticated);
     if (user && user.authenticated) {
 
       // means the user is logged in so we verify permission
@@ -116,8 +136,8 @@ export default (permission = null) => ChildComponent => class withAuth extends C
         if (!this.userHasPermission(user)) {
           proceedToPage = false
 
-          // Show a 404 page (see using next.js' built-in Error page) - TODO does this also work server-side?
-          const statusCode = 404
+          // Show a 403 page (see using next.js' built-in Error page) - TODO does this also work server-side?
+          const statusCode = 403
           initProps = { statusCode }
         }
       }

@@ -32,13 +32,22 @@ class DynamicTableRow extends Component {
             let json = {};
             const { onUpdate, onCreate, onDelete} = this.props;
             const columns = headers.map( (field,colNum) => {
-                return (<DataColumn key={colNum} name={field} value={data[field]} />);
+               let value;
+                if((typeof data[field] === 'string' || data[field] instanceof String) || (data[field] === 'number' && isFinite(data[field]))){
+                   value = data[field];
+                }   else if (data[field] === undefined || data[field] === null){
+                   value = '';
+                }
+                else {
+                  value = JSON.stringify(data[field]);
+                }
+                return (<DataColumn key={colNum} name={field} value={value} />);
             });
             if(onUpdate){
-              columns.push(<ActionColumn key={colNum} name='updateButton' value='Update' handleClick={onUpdate} />);
+              columns.push(<ActionColumn name='updateButton' value='Update' handleClick={onUpdate} />);
             }
             if(onDelete){
-              columns.push(<ActionColumn key={colNum} name='deleteButton' value='Delete' handleClick={onDelete} />);
+              columns.push(<ActionColumn name='deleteButton' value='Delete' handleClick={onDelete} />);
             }
             return columns;
         }

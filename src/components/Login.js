@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import { initStore } from '../store';
 import { login } from '../actions/authActions';
 import AuthForm from '../components/AuthForm';
-
+import Router from 'next/router';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+import withAuth,{ PUBLIC } from '../components/withAuth';
 
 class Login extends Component {
 
   state = {
-    alias: '',
+    username: '',
     password: '',
     errorMessages: [],
     isRegister:false,
@@ -16,60 +18,84 @@ class Login extends Component {
     changePassword:false,
     isLoading:false
   }
+  _isMounted = false;
 
-  setLoading = (bool) =>{
-      this.setState({isLoading:bool});
+  redirect(){
+    const {user} = this.props;
+    console.log("redirecting",user);
+    if(user.authenticated) {
+      window.location.href = '/';
+      //Router.push("/");
+    }
   }
 
+
   handleOnChange = (e) => {
-    this.setState({
-      [e.target.name]: e.target.value
-    })
+    if(this._isMounted) this.setState({[e.target.name]: e.target.value});
+  }
+
+  componentDidMount(){
+    this._isMounted = true;
+  }
+
+  componentWillUnmount(){
+    this._isMounted = false;
   }
 
   handleLoginSubmit = (e) => {
     e.preventDefault()
 
-    this.setLoading(true);
+    if(this._isMounted) this.setState({isLoading:true,errorMessages:[]});
     const { dispatch, next } = this.props;
     const payload = {
-      alias: this.state.alias,
+      username: this.state.username,
       password: this.state.password
     };
-    /*
-    dispatch(login(payload,this.props.next))
-    .then(()=>{
-        this.setLoading(false);
+
+    dispatch(login(payload,this.props.next)).then(()=>{
+      this.setLoading(false);
+      this.redirect();
     })
-    .catch(err => {
-        this.setState({errorMessages: [err.message],isLoading:false});
-    });*/
+    .catch(errMessage => {
+        console.log(errMessage);
+        if(this._isMounted)
+          this.setState({errorMessages: [errMessage],isLoading:false});
+    });
+
+
   }
 
-  setLoading = (bool) =>{
-      this.setState({isLoading:bool});
+  setLoading = (bool) => {
+      if(this._isMounted) this.setState({isLoading:bool});
   }
 
-    static  async getInitialProps(context) {
-        const {query} = context;
-        return{
-            next: query.next
-        };
-    }
+  static  async getInitialProps(context) {
+      const {query} = context;
+      return{
+          next: query.next
+      };
+  }
 
 
   render () {
-    const {alias, password, errorMessages,isRegister,resetPassword,changePassword,isLoading} = this.state;
+    const {username, password, errorMessages,isRegister,resetPassword,changePassword,isLoading} = this.state;
 
     return (
       <div className="container">
         <h1 className="text-center">Login</h1>
         <div>
-          <AuthForm {...{alias, password, errorMessages, isRegister, resetPassword,changePassword, isLoading,onChange: this.handleOnChange, onSubmit: this.handleLoginSubmit}} />
+          <AuthForm {...{username, password, errorMessages, isRegister, resetPassword,changePassword, isLoading,onChange: this.handleOnChange, onSubmit: this.handleLoginSubmit}} />
         </div>
       </div>
     )
   }
 }
 
-export default connect()(Login)
+const mapStateToProps = (state) => {
+  console.log(state);
+  return {
+    user: state.auth.user
+  }
+}
+
+export default compose(withAuth(PUBLIC),connect(mapStateToProps))(Login);

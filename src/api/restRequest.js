@@ -13,13 +13,36 @@ import { API_HOST } from './storage'
 // https://github.com/zeit/next.js/tree/canary/examples/with-universal-configuration-runtime
 //
 
+const handleError = (error) => {
+  if(error.response && error.response.data && error.response.data.error){
+    return {message:error.response.data.error};
+  } else if(error.response) {
+    return error.response;
+  }
+  else {
+    return error;
+  }
+}
+
+const responseHandler = (response) => {
+  if(response.data) return response.data
+  else return response;
+}
 
 const getUrl = endpoint => API_HOST + endpoint;
 
 export const post = async (endpoint, data) => {
-  return axios.post(getUrl(endpoint), data, {
-    headers: { "Content-Type": "application/json","Accept":"application/json" }
-  });
+
+  const endPointUrl = getUrl(endpoint);
+  try{
+    const response = await axios.post(endPointUrl, data, {
+      headers: { "Content-Type": "application/json","Accept":"application/json" }
+    });
+    return responseHandler(response);
+  }
+  catch(error){
+    return Promise.reject(handleError(error));
+  }
 };
 
 export const get = async (endpoint) => {
@@ -28,13 +51,25 @@ export const get = async (endpoint) => {
         headers: { "Accept":"application/json" }
       }
     : null;
-  return axios.get(getUrl(endpoint), headers);
+  try{
+    const response = await axios.get(getUrl(endpoint), headers);
+    return responseHandler(response);
+  }
+  catch(error){
+    return Promise.reject(handleError(error));
+  }
 };
 
 export const postWithJWT = async (endpoint, jwt ,data) => {
-  return axios.post(getUrl(endpoint), data, {
-    headers: { "Accept":"application/json","Content-Type": "application/json", "Authorization": `${jwt}` }
-  });
+  try{
+    const response = await axios.post(getUrl(endpoint), data, {
+      headers: { "Accept":"application/json","Content-Type": "application/json", "Authorization":`${jwt}` }
+    });
+    return responseHandler(response);
+  }
+  catch(error){
+    return Promise.reject(handleError(error));
+  }
 };
 
 export const getWithJWT = async (endpoint, jwt) => {
@@ -43,7 +78,13 @@ export const getWithJWT = async (endpoint, jwt) => {
         headers: { "Accept":"application/json","Authorization": `${jwt}` }
       }
     : null;
-  return axios.get(getUrl(endpoint), headers);
+    try{
+      const response = await axios.get(getUrl(endpoint), headers);
+      return responseHandler(response);
+    }
+    catch(error){
+      return Promise.reject(handleError(error));
+    }
 };
 
-export default {get:get,post:post}
+export default {get,post,getWithJWT,postWithJWT};

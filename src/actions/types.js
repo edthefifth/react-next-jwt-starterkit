@@ -16,3 +16,5 @@ export const GET_STATISTICS = 'GET_STATISTICS';
 
 export const SET_REFRESH_TOKEN = 'SET_REFRESH_TOKEN';
 export const REFRESH_TOKEN = 'REFRESH_TOKEN';
+
+export const LOGOUT = 'LOGOUT';

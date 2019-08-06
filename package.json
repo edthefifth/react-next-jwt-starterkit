@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.15",
-    "@fortawesome/free-solid-svg-icons": "^5.7.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.20",
+    "@fortawesome/free-solid-svg-icons": "^5.10.0",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "autoprefixer": "^9.6.1",
     "axios": "^0.18.1",
@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "next": "^7.0.3",
+    "next-cookies": "^1.1.2",
     "next-redux-wrapper": "^2.1.0",
     "node-sass": "^4.12.0",
     "normalize.css": "^8.0.1",
@@ -28,11 +29,13 @@
     "raw-loader": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-js-pagination": "^3.0.2",
     "react-redux": "^6.0.1",
     "react-scripts": "^3.0.1",
     "reactstrap": "^8.0.1",
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
+    "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "sass-loader": "^7.1.0",
     "socket.io-client": "^2.2.0"
@@ -53,9 +56,10 @@
     "nodemon": "^1.19.1"
   },
   "scripts": {
-    "dev": "NODE_ENV=dev node app.js",
-    "start": "NODE_ENV=$NODE_ENV node app.js",
-    "build": "cd src && next build -p $NODE_PORT",
+    "dev": "NODE_ENV=development next src",
+    "start": "NODE_ENV=$NODE_ENV next start src",
+    "build": "next build src -p $NODE_PORT",
+    "export": "next build src && next export src",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

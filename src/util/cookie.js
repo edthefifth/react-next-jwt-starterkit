@@ -1,4 +1,5 @@
 import cookie from 'js-cookie';
+import nextCookie from 'next-cookies';
 
 export const setCookie = (key, value) => {
   if (process.browser) {
@@ -17,37 +18,9 @@ export const removeCookie = (key) => {
   }
 };
 
-export const getFromSecureSession = (req,key) => {
-  const value = req.session ? req.session[key] : null;
-}
 
-export const storeInSecureSession = (req,key,value) => {
-  if(req.session)
-  {
-    req.session[key]=value;
-  }
-  return req;
-}
 
-export const getCookie = (key, req) => {
-  return process.browser
-    ? getCookieFromBrowser(key)
-    : getCookieFromServer(key, req);
-};
-
-const getCookieFromBrowser = key => {
-  return cookie.get(key);
-};
-
-const getCookieFromServer = (key, req) => {
-  if (!req || !req.headers || !req.headers.cookie) {
-    return undefined;
-  }
-  const rawCookie = req.headers.cookie
-    .split(';')
-    .find(c => c.trim().startsWith(`${key}=`));
-  if (!rawCookie) {
-    return undefined;
-  }
-  return rawCookie.split('=')[1];
+export const getCookie = (key, ctx) => {
+  const cookie = nextCookie(ctx);
+  return cookie[key];
 };

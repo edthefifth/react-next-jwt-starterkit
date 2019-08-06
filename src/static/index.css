@@ -1,0 +1,34 @@
+body {
+    padding-top: 120px;
+}
+
+a:hover {
+ cursor:pointer;
+ opacity:.7;
+ filter: invert(100%);
+}
+
+.card:hover{
+  opacity:.7;
+}
+
+.user-profile-icon{
+    font-size:30px;
+}
+
+
+.fs-2-5-vw{
+    font-size:2.5vw;
+}
+
+.rounded {
+    border-radius: .25rem !important;
+}
+
+.card-box{
+  padding:3rem;
+}
+
+.pad-bottom-40{
+  padding-bottom:40px;
+}

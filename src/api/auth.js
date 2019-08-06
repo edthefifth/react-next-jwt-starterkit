@@ -3,85 +3,80 @@ import { removeCookie } from '../util/cookie';
 
 import jwt from 'jsonwebtoken';
 
-function decodeJWT (acccessJWT) {
-    const decodedJWT = jwt.verify(accessJWT);
+function decodeJWT (accessJWT) {
+    const decodedJWT = jwt.decode(accessJWT);
     decodedJWT.user.authenticated = true;
-    return Promise.resolve({
+    if(decodedJWT.permissions) decodedJWT.user.permissions = decodedJWT.permissions;
+    const authObj = {
       user: decodedJWT.user,
-      jwt: acccessJWT,
+      jwt: accessJWT,
       expiration: decodedJWT.exp
-    });
+    };
+    return authObj;
 }
 
 function clearUser(){
-    return Promise.resolve({
+    return {
         user: {authenticated:false},
         jwt: null,
         expiration: -1
-    });
+    };
 }
 
 const auth = {
 
   authenticate (accessCookie) {
-    let accessJWT = accessCookie.token;
-    return decodeJWT(accessJWT);
+    if(!accessCookie || !accessCookie.token){
+      return Promise.reject('Token is not set');
+    }
+    else{
+      let accessJWT = decodeJWT(accessCookie.token);
+      return Promise.resolve(accessJWT);
+    }
   },
 
   signout () {
-    return clearUser();
+    return Promise.resolve(clearUser());
   },
 
-  register (username, password) {
-    return client.post("/register",{
-      username: username,
-      password: password
-    }).then((_u)=>{
-        console.log('register auth',_u);
-        const accessJWT = _u.access;
-        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
-            return Promise.resolve({
-                user: user,
-                access:_u.access,
-                refresh:_u.refresh
-            });
-        });
-    });
+  async register (username, password) {
+        const resp = await client.post("/register",{username,password})
+        const accessJWT = _u.access.token;
+        const {user} = decodeJWT(accessJWT)
+        return {
+            user: user,
+            access:_u.access,
+            refresh:_u.refresh
+        };
+
   },
 
-  login (username, password) {
-    return client.post("/login",{
-      username: username,
-      password: password
-    }).then((_u)=>{
-        console.log('login auth',_u);
-        const accessJWT = _u.access;
-        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
-            return Promise.resolve({
-                user: user,
-                access:_u.access,
-                refresh:_u.refresh
-            });
-        });
-    });
+  async login (username, password) {
+
+        const resp = await client.post("/login",{username,password});
+        const {user} = decodeJWT(resp.access.token);
+        return {
+            user: user,
+            access:resp.access,
+            refresh:resp.refresh
+        };
+
   },
 
-  refresh (username, refreshToken) {
-    return client.post("/refreshToken",{
-      username: username,
-      token: refreshToken.token
-    }).then((_u)=>{
-        console.log('refresh response',_u);
-        const accessJWT = _u.access;
-        return decodeJWT(accessJWT).then(({user,jwt,expiration})=>{
-            return Promise.resolve({
-                user: user,
-                access:_u.access
-            });
-        });
+  async refresh (username, refreshToken) {
+    const resp = await client.post("/refreshtoken",{
+      username,
+      refreshToken
     });
+    console.log('refresh response',resp);
+    const {user} = decodeJWT(resp.access.token);
+    return {
+            user: user,
+            access:resp.access
+    };
+
   }
 
-}
+};
 
 export default auth;

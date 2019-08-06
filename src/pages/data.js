@@ -14,15 +14,18 @@ class DataPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          activeTab:1
+          activeTab:0,
+          list:[
+            {name:'users',readAPI:'find'},
+            {name:'groups',readAPI:'find'}
+          ],
+          activeObject:null
         };
+        this.state.activeObject = this.state.list[this.state.activeTab];
 
     }
 
 
-    getList = () => {
-        return [{name:'users',readAPI:'get_users'},{name:'groups',readAPI:'get_groups'}]
-    };
 
 
 
@@ -30,16 +33,16 @@ class DataPage extends Component {
 
 
     setActiveTab = (tab) =>{
-        this.setState({activeTab:tab});
+        const { list } = this.state;
+        const newActiveObject = list[tab];
+        this.setState({activeTab:tab,activeObject:newActiveObject});
     }
 
 
 
 
 
-    componentDidMount =()=>{
 
-    }
 
     loadTableData(activeTab,myTab){
       const tabInt = parseInt(activeTab);
@@ -48,26 +51,18 @@ class DataPage extends Component {
 
     render () {
         const { user } = this.props;
-        const {activeTab} = this.state;
+        const {activeTab, list } = this.state;
         const isAuth = user ? user.authenticated : false;
-        const list = this.getList();
-        let objectPanes = list.map( (listItem,itemIndex) => {
-          const readAPI = listItem.readAPI?listItem.readAPI:'get';
-          return (
-            <TabPane tabId={(itemIndex+1)} key={itemIndex}>
-              <CrudTableObject readAPI={readAPI} title={listItem.name} loadData={this.loadTableData(activeTab,(itemIndex+1))} />
-            </TabPane>
-          );
-        });
+        const activeObject = list[activeTab];
+
         const onSetActiveTab = this.setActiveTab;
         return (
 
                 <Layout>
                     <ListNav setActiveTab={onSetActiveTab} listArray={list} activeTab={activeTab} />
 
-                    <TabContent activeTab={activeTab}>
-                    {objectPanes}
-                    </TabContent>
+                    <CrudTableObject activeObject={activeObject} activeTab={activeTab} />
+
                 </Layout>
         );
     }
@@ -79,4 +74,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default compose(withAuth(PUBLIC),connect(mapStateToProps))(DataPage);
+export default compose(withAuth('admin',1),connect(mapStateToProps))(DataPage);

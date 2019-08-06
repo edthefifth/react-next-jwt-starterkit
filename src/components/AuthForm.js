@@ -14,7 +14,7 @@ class AuthForm extends react.Component {
 
     render () {
 
-        const { alias,password,errorMessages, changePassword, resetPassword, isRegister,termsOfService,privacyPolicy,whiteHatConstitution,isLoading, onChange, onSubmit } = this.props;
+        const { username,password,errorMessages, changePassword, resetPassword, isRegister,termsOfService,privacyPolicy,whiteHatConstitution,isLoading, onChange, onSubmit } = this.props;
         const borderClass = errorMessages && errorMessages.length > 0 ? 'border border-danger p-3' : 'border p-3';
         const passwordLabel = changePassword ? "Old Password" : "Password";
 

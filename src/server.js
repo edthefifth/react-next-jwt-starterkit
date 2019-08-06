@@ -1,10 +1,11 @@
 const express = require('express')
 var session = require('express-session')
+var cookieParser = require('cookie-parser')
 const next = require('next')
 
 const env = process.env.NODE_ENV || 'dev'
 const config = require('../config/'+env+'.json');
-const dev =  env !== 'production' || 'dev'
+const dev =  env !== 'production'
 const port = process.env.NODE_PORT || config.port;
 const sessSecret =  config.sessSecret || 'vinegar nest professor radiation';
 
@@ -19,11 +20,11 @@ const handle = app.getRequestHandler()
 app.prepare()
 .then(() => {
   const server = express()
-  app.use(session({
+  server.use(session({
     secret: sessSecret,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { secure: !dev ,httpOnly:!dev }
   }));
 
   server.get('*', (req, res) => {
