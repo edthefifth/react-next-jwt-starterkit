@@ -215,7 +215,7 @@ class CrudTableObject extends Component {
                         </Row>
 
                         <Row className="mb-sm-1 d-flex justify-content-between">
-                          <Col xs="6" sm="3"><p className="text-dark">{queryTotal} {title}</p></Col>
+                          <Col xs="6" sm="3"><p className="text-dark"><span className='badge badge-primary'>{queryTotal} {title}</span></p></Col>
                           <Col xs="auto" sm="auto">
 
                             { filters && filters.length > 0 &&

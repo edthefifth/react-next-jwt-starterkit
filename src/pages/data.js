@@ -74,4 +74,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default compose(withAuth('admin',1),connect(mapStateToProps))(DataPage);
+export default compose(withAuth(PUBLIC),connect(mapStateToProps))(DataPage);
