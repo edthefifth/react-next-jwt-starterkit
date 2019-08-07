@@ -118,6 +118,7 @@ class CrudTableObject extends Component {
             const queryTotal = queryData.paginate ? queryData.paginate.total : 0 ;
             const loading = isQuerying || currentTab !== activeTab;
             const currentPage = (currentQuerySkip/queryLimit) + 1;
+            const headers = activeObject && activeObject.headers ? activeObject.headers : null
             return (
                   <Container className="mt-sm-3">
 
@@ -140,7 +141,7 @@ class CrudTableObject extends Component {
                           </Col>
                         </Row>
 
-                        <DynamicTable currentPage={currentPage} onPaginate={this.onPaginate} loading={loading} name={name}  queryResults={queryResults} pageLimit={queryLimit} totalRecords={queryTotal}   />
+                        <DynamicTable currentPage={currentPage} onPaginate={this.onPaginate} loading={loading} name={name}  queryResults={queryResults} headers={headers} pageLimit={queryLimit} totalRecords={queryTotal}   />
 
 
                   </Container>
