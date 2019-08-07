@@ -17,13 +17,13 @@ class DynamicTable extends Component {
 
 
         fillHeader = (headers = null) => {
-            const { queryResults=[], loading} = this.props;
+            const { onUpdateQuery,queryResults=[], loading} = this.props;
             if(loading) return null;
 
 
             if(headers !== null)
             {
-              return <DynamicTableRow isHeader={true} headers={headers} />;
+              return <DynamicTableRow isHeader={true} headers={headers} onUpdateQuery={onUpdateQuery} />;
             }
             else {
               return <tr></tr>;
@@ -47,7 +47,8 @@ class DynamicTable extends Component {
               return tableRows;
             }
             else{
-              return [<tr key={0} ><td>Empty</td></tr>];
+              const colspan = headers && headers.length > 0 ? headers.length : 1;
+              return [<tr key={0} ><td colSpan={colspan}>Empty</td></tr>];
             }
 
         }
@@ -56,22 +57,24 @@ class DynamicTable extends Component {
 
         render () {
 
-            const {loading,queryResults,onPaginate,currentPage, totalRecords=0,pageLimit=50} = this.props;
-            let headers = null;
-
-            if(queryResults && queryResults.length > 0) {
-              headers = Object.keys(queryResults[0]);
+            const {loading,queryResults,onPaginate,currentPage,headers = null, totalRecords=0,pageLimit=50} = this.props;
+            let initHeaders;
+            if(headers === null && queryResults && queryResults.length > 0){
+              initHeaders = Object.keys(queryResults[0])
+            } else {
+              initHeaders = headers;
             }
-            const headerRow = this.fillHeader(headers);
-            const tableRows = this.fillTable(headers);
+
+            const headerRow = this.fillHeader(initHeaders);
+            const tableRows = this.fillTable(initHeaders);
             return (
-                <Container>
+                <Fragment>
                   { loading &&
                     <Loading text='Querying' />
                   }
                   {!loading &&
-                    <Fragment>
-                      <Table striped bordered>
+                    <div className="table-responsive">
+                      <Table striped bordered size="sm">
                         <thead>
                         {headerRow}
                         </thead>
@@ -85,10 +88,10 @@ class DynamicTable extends Component {
                         totalItems={totalRecords}
                         onClick={onPaginate}
                       />
-                    </Fragment>
+                    </div>
                   }
 
-                </Container>
+                </Fragment>
             );
         }
 }

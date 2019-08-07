@@ -2,10 +2,14 @@ body {
     padding-top: 120px;
 }
 
-a:hover {
+a:hover, button:hover {
  cursor:pointer;
  opacity:.7;
  filter: invert(100%);
+}
+
+.border-transparent,.border-transparent:hover,.border-transparent:active{
+  border-color:transparent;
 }
 
 .card:hover{
@@ -31,4 +35,12 @@ a:hover {
 
 .pad-bottom-40{
   padding-bottom:40px;
+}
+
+.table-responsive{
+  overflow-x: scroll;
+}
+
+.nowrap {
+  white-space: nowrap;
 }

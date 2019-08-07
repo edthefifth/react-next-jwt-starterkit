@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import DataColumn from '../components/DataColumn';
 import ActionColumn from '../components/ActionColumn';
+import { faFilter } from '@fortawesome/free-solid-svg-icons'
 
 class DynamicTableRow extends Component {
 
@@ -15,9 +16,19 @@ class DynamicTableRow extends Component {
 
         headerFill = (headers) =>{
             let json = {};
-            const { onUpdate, onCreate, onDelete} = this.props;
+            const { onUpdate, onCreate, onDelete, onUpdateQuery=null} = this.props;
             const columns = headers.map( (field,colNum) =>{
-                return (<DataColumn key={colNum} name={field} value={field} isHeader={true} />);
+                if(onUpdateQuery){
+                  return <ActionColumn key={colNum} name={field} icon={faFilter} value={field} filter={true} handleClick={onUpdateQuery} />;
+                } else {
+                  return (
+                    <DataColumn
+                          key={colNum} name={field}
+                          value={field}
+                          isHeader={true} />
+                  );
+                }
+
             });
             if(onUpdate){
               columns.push(<DataColumn key={colNum} name='updateButton' value='' isHeader={true}/>);
@@ -39,7 +50,7 @@ class DynamicTableRow extends Component {
                    value = '';
                 }
                 else {
-                  value = JSON.stringify(data[field]);
+                    value = JSON.stringify(data[field]);
                 }
                 return (<DataColumn key={colNum} name={field} value={value} />);
             });
