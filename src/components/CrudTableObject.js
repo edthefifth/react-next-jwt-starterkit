@@ -25,8 +25,16 @@ class CrudTableObject extends Component {
             successMessages:[],
             currentTab:null,
             queryLimit:50,
-            currentQuerySkip:0
+            currentQuerySkip:0,
+            queryDropdownOpen:false,
+            dropdownField:'',
+            dropdownValue:''
         };
+    }
+
+    toggleQueryDropdown = () => {
+        const {queryDropdownOpen} = this.state;
+        this.setState({queryDropdownOpen:!queryDropdownOpen});
     }
 
     toggleQuerying = () => {
@@ -91,15 +99,24 @@ class CrudTableObject extends Component {
 
     changeQuery = (e) => {
       try{
-        const query = JSON.parse(e.target.value);
-        this.setState({activeQuery:query});
-        this.onQuery();
+        const queryValue = JSON.parse(e.target.value);
+        const {dropdownField,dropdownValue} = this.state;
+        if(queryValue === dropdownValue) return null;
+        const newQuery = {};
+        query[dropdownField]=dropdownValue
+        this.setState({dropdownValue:queryValue,activeQuery:newQuery});
+        this.onQuery(0);
       }
       catch(err){
         console.log(err);
         this.setState({errorMessage:err.message});
       }
 
+    }
+
+    changeDropdownField = (fieldName) => {
+      const {dropdownField} = this.state;
+      this.setState({dropdownField:fieldName});
     }
 
     onPaginate = (pageNumber) => {
@@ -110,7 +127,7 @@ class CrudTableObject extends Component {
     }
 
     getDynamicTable = () => {
-            const { activeQuery,errorMessages,successMessages, isQuerying, currentTab, queryLimit, currentQuerySkip } = this.state;
+            const { errorMessages,successMessages, isQuerying, currentTab, queryLimit, currentQuerySkip, dropdownField, dropdownValue } = this.state;
             const { activeObject, queryData, activeTab } = this.props;
             const name = activeObject.name;
             const title = activeObject.name.replace(/_/g," ");
@@ -120,7 +137,7 @@ class CrudTableObject extends Component {
             const currentPage = (currentQuerySkip/queryLimit) + 1;
             const headers = activeObject && activeObject.headers ? activeObject.headers : null
             return (
-                  <Container className="mt-sm-3">
+                  <Fragment>
 
                         <Row className="mb-sm-1">
                             <Col>
@@ -136,15 +153,28 @@ class CrudTableObject extends Component {
                         <Row className="mb-sm-1">
                           <Col></Col>
                           <Col>
-                            <label>Filters:</label>
-                            <input type='hidden' value={JSON.stringify(activeQuery)} onChange={this.changeQuery}/>
+                            { headers !== null &&
+                              <label>Filters:</label>
+                              <InputGroup>
+                                <InputGroupButtonDropdown addonType="append" isOpen={this.state.queryDropdownOpen} toggle={this.toggleQueryDropDown}>
+                                  <DropdownToggle caret>
+                                    Button Dropdown
+                                  </DropdownToggle>
+                                  <DropdownMenu>
+                                    {headers.map((headerField) => <DropdownItem onClick={() => this.changeDropdownField(headerField)}>{headerField}</DropdownItem>)}
+                                  </DropdownMenu>
+                                </InputGroupButtonDropdown>
+                                <Input value/>
+
+                              </InputGroup>
+                            }
                           </Col>
                         </Row>
 
                         <DynamicTable currentPage={currentPage} onPaginate={this.onPaginate} loading={loading} name={name}  queryResults={queryResults} headers={headers} pageLimit={queryLimit} totalRecords={queryTotal}   />
 
 
-                  </Container>
+                  </Fragment>
             );
     }
 
